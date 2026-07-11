@@ -42,10 +42,11 @@ flowchart LR
 Copy-Item .env.example .env
 uv sync
 docker compose up -d postgres
-uv run python -m ingestion.ingest --documents documents_demo --sql-schema-path sql/schema.sql
-uv run uvicorn agent.api:app --host 0.0.0.0 --port 8058
-uv run streamlit run ui/app.py
+docker compose run --rm api python -m ingestion.ingest --documents documents_demo --sql-schema-path sql/schema.sql
+docker compose up -d api ui
 ```
+
+浏览器打开 `http://localhost:8501`。如果不使用 Docker、改为在宿主机运行 API，请把 `.env` 中的 `DB_HOST` 改为 `localhost`、`DB_PORT` 改为 `6543`。
 
 在 `.env` 中填写 OpenAI-compatible 配置：
 
