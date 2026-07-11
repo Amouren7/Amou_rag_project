@@ -15,6 +15,8 @@ from dotenv import load_dotenv
 from pydantic_ai.messages import PartStartEvent, PartDeltaEvent, TextPartDelta
 
 from .agent import rag_agent, AgentDependencies
+from .citations import build_citations
+from .tools import get_retrieval_trace, reset_retrieval_trace
 from .db_utils import (
     execute_init_sql,
     initialize_database,
@@ -276,6 +278,7 @@ async def execute_agent(
         Tuple of (agent response, tools used)
     """
     try:
+        reset_retrieval_trace()
         # Create dependencies
         deps = AgentDependencies(
             session_id=session_id,
@@ -312,7 +315,7 @@ async def execute_agent(
                 }
             )
         
-        return response, tools_used
+        return response, tools_used, build_citations(get_retrieval_trace())
         
     except Exception as e:
         logger.error(f"Agent execution failed: {e}")
@@ -326,7 +329,7 @@ async def execute_agent(
                 metadata={"error": str(e)}
             )
         
-        return error_response, []
+        return error_response, [], []
 
 
 # API Endpoints
@@ -364,7 +367,7 @@ async def chat(request: ChatRequest):
         session_id = await get_or_create_session(request)
         
         # Execute agent
-        response, tools_used = await execute_agent(
+        response, tools_used, citations = await execute_agent(
             message=request.message,
             session_id=session_id,
             user_id=request.user_id
@@ -372,8 +375,10 @@ async def chat(request: ChatRequest):
         
         return ChatResponse(
             message=response,
+            answer=response,
             session_id=session_id,
             tools_used=tools_used,
+            citations=citations,
             metadata={"search_type": str(request.search_type)}
         )
         
@@ -392,6 +397,7 @@ async def chat_stream(request: ChatRequest):
         async def generate_stream():
             """Generate streaming response using agent.iter() pattern."""
             try:
+                reset_retrieval_trace()
                 yield f"data: {json.dumps({'type': 'session', 'session_id': session_id})}\n\n"
                 
                 # Create dependencies
@@ -465,7 +471,8 @@ async def chat_stream(request: ChatRequest):
                     }
                 )
                 
-                yield f"data: {json.dumps({'type': 'end'})}\n\n"
+                citations = [citation.model_dump() for citation in build_citations(get_retrieval_trace())]
+                yield f"data: {json.dumps({'type': 'final', 'answer': full_response, 'citations': citations, 'tools_used': tools_data if tools_used else [], 'session_id': session_id}, ensure_ascii=False)}\n\n"
                 
             except Exception as e:
                 logger.error(f"Stream error: {e}")

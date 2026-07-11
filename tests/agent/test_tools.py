@@ -1,11 +1,12 @@
 import pytest
 
 from agent.models import ChunkResult
-from agent.tools import HybridSearchInput, hybrid_search_tool
+from agent.tools import HybridSearchInput, get_retrieval_trace, hybrid_search_tool, reset_retrieval_trace
 
 
 @pytest.mark.asyncio
 async def test_hybrid_tool_fuses_vector_and_keyword_results(monkeypatch):
+    reset_retrieval_trace()
     async def fake_embedding(_):
         return [0.1, 0.2]
 
@@ -29,3 +30,5 @@ async def test_hybrid_tool_fuses_vector_and_keyword_results(monkeypatch):
     assert results[0].chunk_id == "b"
     assert results[0].page_number == 2
     assert results[0].search_type == "hybrid"
+    trace = get_retrieval_trace()
+    assert trace[0]["chunk_id"] == "b"

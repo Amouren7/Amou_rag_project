@@ -91,6 +91,7 @@ class ChatResponse(BaseModel):
     tools_used: List[ToolCall] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
     citations: List[Citation] = Field(default_factory=list)
+    answer: Optional[str] = None
 
 # Ingestion Models
 class IngestionConfig(BaseModel):

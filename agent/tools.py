@@ -1,5 +1,6 @@
 
 import logging
+from contextvars import ContextVar
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
@@ -20,6 +21,19 @@ from .retrieval import reciprocal_rank_fusion
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+_retrieval_trace: ContextVar[tuple[dict, ...]] = ContextVar("retrieval_trace", default=())
+
+
+def reset_retrieval_trace() -> None:
+    _retrieval_trace.set(())
+
+
+def get_retrieval_trace() -> list[dict]:
+    return [dict(row) for row in _retrieval_trace.get()]
+
+
+def _record_retrieval(rows: List[Dict[str, Any]]) -> None:
+    _retrieval_trace.set(_retrieval_trace.get() + tuple(dict(row) for row in rows))
 
 # Initialize embedding client with flexible provider
 embedding_client = get_embedding_client()
@@ -84,6 +98,10 @@ async def vector_search_tool(input_data: VectorSearchInput) -> List[ChunkResult]
             embedding=embedding,
             limit=input_data.limit
         )
+        for row in results:
+            row["score"] = row.get("similarity", 0.0)
+            row["search_type"] = "vector"
+        _record_retrieval(results)
 
         # Convert to ChunkResult models
         return [
@@ -123,6 +141,7 @@ async def hybrid_search_tool(input_data: HybridSearchInput) -> List[ChunkResult]
         vector_results = await vector_search(embedding=embedding, limit=input_data.limit)
         keyword_results = await keyword_search(input_data.query, limit=input_data.limit)
         results = reciprocal_rank_fusion(vector_results, keyword_results)[:input_data.limit]
+        _record_retrieval(results)
         
         # Convert to ChunkResult models
         return [
