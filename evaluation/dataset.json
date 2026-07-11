@@ -1,0 +1,14 @@
+[
+  {"id":"q01","query":"这款骑行手套的核心防护结构是什么？","expected_sources":["product_handbook.md"],"expected_answer_keywords":["碳纤维","护具"],"requires_citation":true},
+  {"id":"q02","query":"商品签收后几天内可以申请退换？","expected_sources":["after_sales_policy.md"],"expected_answer_keywords":["七天"],"requires_citation":true},
+  {"id":"q03","query":"素材生成前要检查哪些品牌元素？","expected_sources":["content_sop.md"],"expected_answer_keywords":["商标","颜色"],"requires_citation":true},
+  {"id":"q04","query":"GEO内容发布后如何监测？","expected_sources":["geo_sop.md"],"expected_answer_keywords":["每周","高频问题"],"requires_citation":true},
+  {"id":"q05","query":"手套是否支持触屏？","expected_sources":["product_handbook.md"],"expected_answer_keywords":["触屏"],"requires_citation":true},
+  {"id":"q06","query":"哪些情况不支持无理由退换？","expected_sources":["after_sales_policy.md"],"expected_answer_keywords":["影响二次销售"],"requires_citation":true},
+  {"id":"q07","query":"商品短视频如何避免外观漂移？","expected_sources":["content_sop.md"],"expected_answer_keywords":["参考图","状态"],"requires_citation":true},
+  {"id":"q08","query":"如何建立AI推荐问题基线？","expected_sources":["geo_sop.md"],"expected_answer_keywords":["20个","记录"],"requires_citation":true},
+  {"id":"q09","query":"夏季骑行时采用什么透气设计？","expected_sources":["product_handbook.md"],"expected_answer_keywords":["打孔","透气"],"requires_citation":true},
+  {"id":"q10","query":"收到破损商品如何处理？","expected_sources":["after_sales_policy.md"],"expected_answer_keywords":["照片","客服"],"requires_citation":true},
+  {"id":"q11","query":"商品卖点文案需要经过什么检查？","expected_sources":["content_sop.md"],"expected_answer_keywords":["事实","禁用词"],"requires_citation":true},
+  {"id":"q12","query":"如何统一品牌在不同渠道的产品信息？","expected_sources":["geo_sop.md"],"expected_answer_keywords":["标准信息表"],"requires_citation":true}
+]

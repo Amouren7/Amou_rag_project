@@ -476,6 +476,47 @@ wheels = [
 ]
 
 [[package]]
+name = "ecommerce-operations-rag-agent"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "anyio" },
+    { name = "asyncpg" },
+    { name = "docling" },
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "huggingface-hub", extra = ["hf-xet"] },
+    { name = "langchain" },
+    { name = "langchain-core" },
+    { name = "langchain-experimental" },
+    { name = "langchain-openai" },
+    { name = "pydantic-ai" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-mock" },
+    { name = "streamlit" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio", specifier = ">=4.10.0" },
+    { name = "asyncpg", specifier = ">=0.30.0" },
+    { name = "docling", specifier = ">=2.48.0" },
+    { name = "fastapi", specifier = ">=0.116.1" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "huggingface-hub", extras = ["hf-xet"], specifier = ">=0.34.4" },
+    { name = "langchain", specifier = ">=0.3.27" },
+    { name = "langchain-core", specifier = ">=0.3.75" },
+    { name = "langchain-experimental", specifier = ">=0.3.4" },
+    { name = "langchain-openai", specifier = ">=0.3.32" },
+    { name = "pydantic-ai", specifier = ">=0.7.6" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-asyncio", specifier = ">=0.24.0" },
+    { name = "pytest-mock", specifier = ">=3.14.0" },
+    { name = "streamlit", specifier = ">=1.49.0" },
+]
+
+[[package]]
 name = "et-xmlfile"
 version = "2.0.0"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple/" }
@@ -1346,47 +1387,6 @@ wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/95/97/51359c77527d45943fe7a94d00a3843b81162e6c4244b3579fe8fc54cb9c/ninja-1.13.0-py3-none-win32.whl", hash = "sha256:8cfbb80b4a53456ae8a39f90ae3d7a2129f45ea164f43fadfa15dc38c4aef1c9" },
     { url = "https://mirrors.aliyun.com/pypi/packages/29/45/c0adfbfb0b5895aa18cec400c535b4f7ff3e52536e0403602fc1a23f7de9/ninja-1.13.0-py3-none-win_amd64.whl", hash = "sha256:fb8ee8719f8af47fed145cced4a85f0755dd55d45b2bddaf7431fa89803c5f3e" },
     { url = "https://mirrors.aliyun.com/pypi/packages/df/93/a7b983643d1253bb223234b5b226e69de6cda02b76cdca7770f684b795f5/ninja-1.13.0-py3-none-win_arm64.whl", hash = "sha256:3c0b40b1f0bba764644385319028650087b4c1b18cdfa6f45cb39a3669b81aa9" },
-]
-
-[[package]]
-name = "ntt-rag-project"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "anyio" },
-    { name = "asyncpg" },
-    { name = "docling" },
-    { name = "fastapi" },
-    { name = "httpx" },
-    { name = "huggingface-hub", extra = ["hf-xet"] },
-    { name = "langchain" },
-    { name = "langchain-core" },
-    { name = "langchain-experimental" },
-    { name = "langchain-openai" },
-    { name = "pydantic-ai" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-mock" },
-    { name = "streamlit" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anyio", specifier = ">=4.10.0" },
-    { name = "asyncpg", specifier = ">=0.30.0" },
-    { name = "docling", specifier = ">=2.48.0" },
-    { name = "fastapi", specifier = ">=0.116.1" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "huggingface-hub", extras = ["hf-xet"], specifier = ">=0.34.4" },
-    { name = "langchain", specifier = ">=0.3.27" },
-    { name = "langchain-core", specifier = ">=0.3.75" },
-    { name = "langchain-experimental", specifier = ">=0.3.4" },
-    { name = "langchain-openai", specifier = ">=0.3.32" },
-    { name = "pydantic-ai", specifier = ">=0.7.6" },
-    { name = "pytest", specifier = ">=8.4.1" },
-    { name = "pytest-asyncio", specifier = ">=0.24.0" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
-    { name = "streamlit", specifier = ">=1.49.0" },
 ]
 
 [[package]]

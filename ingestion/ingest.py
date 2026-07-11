@@ -17,7 +17,9 @@ from agent.models import IngestionConfig, IngestionResult
 # Import the PDF extractor
 from .extract_files import create_pdf_extractor, PDFExtractionConfig
 from .chunker import ChunkingConfig, DocumentChunk, create_chunker
+from .loaders import load_document
 from agent.providers import get_embedding_model
+from agent.config import get_settings
 
 # Load environment variables
 load_dotenv()
@@ -113,8 +115,9 @@ class DocumentIngestionPipeline:
         """
         start_time = datetime.now()
         
-        # Extract document content with  extraction
-        document_content, document_metadata = self.extractor.extract_pdf_content(file_path)
+        loaded_documents = load_document(file_path)
+        document_content = "\n\n".join(doc.page_content for doc in loaded_documents)
+        document_metadata = dict(loaded_documents[0].metadata)
         document_source = os.path.relpath(file_path, self.documents_folder)
         document_title = document_metadata.get("title", document_source)
 
@@ -185,14 +188,13 @@ class DocumentIngestionPipeline:
         if self.clean_before_ingest:
             await self._clean_databases()
 
-        # Find all PDF files
-        pdf_files = self._find_pdfs_in_directory(self.documents_folder)
+        pdf_files = self._find_documents_in_directory(self.documents_folder)
 
         if not pdf_files:
-            logger.warning(f"No PDF files found in {self.documents_folder}")
+            logger.warning(f"No supported documents found in {self.documents_folder}")
             return []
 
-        logger.info(f"Found {len(pdf_files)} PDF files to process")
+        logger.info(f"Found {len(pdf_files)} supported documents to process")
 
         results = []
 
@@ -227,7 +229,12 @@ class DocumentIngestionPipeline:
 
     async def aembed_chunks(self, chunks: List[DocumentChunk], model: str = "text-embedding-3-small") -> List[DocumentChunk]:
         """Generate embeddings for chunks (LangChain handles batching internally)."""
-        embeddings = OpenAIEmbeddings(model=model)
+        settings = get_settings()
+        embeddings = OpenAIEmbeddings(
+            model=model,
+            api_key=settings.embedding_api_key,
+            base_url=settings.embedding_base_url,
+        )
 
         # Tüm chunk içeriklerini al
         texts = [chunk.content for chunk in chunks]
@@ -252,7 +259,7 @@ class DocumentIngestionPipeline:
 
         return embedded_chunks
 
-    def _find_pdfs_in_directory(self, directory: str, recursive: bool = True) -> List[str]:
+    def _find_documents_in_directory(self, directory: str, recursive: bool = True) -> List[str]:
         """
         Find all PDF files in a directory.
 
@@ -268,15 +275,15 @@ class DocumentIngestionPipeline:
         if not directory_path.exists() or not directory_path.is_dir():
             raise FileNotFoundError(f"Directory not found or not a directory: {directory_path}")
 
-        if recursive:
-            pdf_files = list(directory_path.rglob("*.pdf"))
-        else:
-            pdf_files = list(directory_path.glob("*.pdf"))
+        iterator = directory_path.rglob("*") if recursive else directory_path.glob("*")
+        files = [path for path in iterator if path.is_file() and path.suffix.lower() in {".pdf", ".md", ".txt"}]
+        paths = [str(path.resolve()) for path in sorted(files)]
+        logger.info(f"Found {len(paths)} supported documents in {directory_path}")
+        return paths
 
-        pdf_paths = [str(pdf.resolve()) for pdf in pdf_files if pdf.is_file()]
-        logger.info(f"Found {len(pdf_paths)} PDF files in {directory_path}")
-
-        return pdf_paths
+    def _find_pdfs_in_directory(self, directory: str, recursive: bool = True) -> List[str]:
+        """Backward-compatible alias retained for upstream callers."""
+        return self._find_documents_in_directory(directory, recursive)
 
     async def _save_to_postgres(
         self,

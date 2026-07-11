@@ -264,7 +264,7 @@ async def execute_agent(
     session_id: str,
     user_id: Optional[str] = None,
     save_conversation: bool = True
-) -> tuple[str, List[ToolCall]]:
+) -> tuple[str, List[ToolCall], list]:
     """
     Execute the agent with a message.
     

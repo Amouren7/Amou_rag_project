@@ -13,7 +13,7 @@ APP_PORT = int(os.getenv("APP_PORT", 8000))
 
 API_URL = os.getenv("API_URL", f"http://localhost:{APP_PORT}")
 
-st.set_page_config(page_title="Agentic RAG", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="电商运营知识 RAG Agent", page_icon="🧠", layout="wide")
 USER_ID = "user"
 
 # Session state init
@@ -71,7 +71,14 @@ async def stream_chat(message: str, base_url: str):
                         full_response += f"\n [Tool: {tool_name}] \n Args: {tool_args}"
                     response_box.write(full_response)
                     
-                elif data.get("type") == "end":
+                elif data.get("type") == "final":
+                    citations = data.get("citations", [])
+                    if citations:
+                        full_response += "\n\n**参考来源**"
+                        for citation in citations:
+                            page = f" 第 {citation['page_number']} 页" if citation.get("page_number") else ""
+                            full_response += f"\n- {citation.get('document_title', citation.get('document_source'))}{page}: {citation.get('snippet', '')}"
+                    response_box.write(full_response)
                     break
 
     response_box.write(full_response)
@@ -84,8 +91,8 @@ def run_async(message: str, base_url: str):
 
 # Sidebar
 with st.sidebar:
-    st.header("Settings")
-    base_url = st.text_input("API URL", value=API_URL)
+    st.header("运行设置")
+    base_url = st.text_input("API 地址", value=API_URL)
 
     if st.button("Check Health"):
         if check_health(base_url):
@@ -101,13 +108,14 @@ with st.sidebar:
     st.divider()
 
 # Main chat
-st.title("Agentic RAG")
+st.title("电商运营知识 RAG Agent")
+st.caption("面向商品资料、平台规则、内容规范与运营 SOP 的可追溯问答")
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-if prompt := st.chat_input("Ask something..."):
+if prompt := st.chat_input("请输入运营问题，例如：商品签收后几天内可以退换？"):
     # Show user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):

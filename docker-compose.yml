@@ -3,16 +3,16 @@ services:
     image: pgvector/pgvector:pg17
     container_name: postgres_pgvector
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-vector_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "6543:5432" 
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-vector_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,9 +22,9 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: agent_api
-    command: uvicorn agent.api:app --host ${APP_HOST} --port ${APP_PORT}
+    command: uvicorn agent.api:app --host ${APP_HOST:-0.0.0.0} --port ${APP_PORT:-8058}
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - "${APP_PORT:-8058}:${APP_PORT:-8058}"
     env_file: .env
     depends_on:
       postgres:
@@ -36,9 +36,9 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: agent_ui
-    command: streamlit run ui/app.py --server.port=${SERVER_PORT} --server.address=${SERVER_HOST}
+    command: streamlit run ui/app.py --server.port=${SERVER_PORT:-8501} --server.address=${SERVER_HOST:-0.0.0.0}
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
+      - "${SERVER_PORT:-8501}:${SERVER_PORT:-8501}"
     env_file: .env
     depends_on:
       - api

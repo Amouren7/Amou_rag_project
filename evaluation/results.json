@@ -1,0 +1,194 @@
+{
+  "mode": "fixture",
+  "metrics": {
+    "total_questions": 12,
+    "errors": 0,
+    "k": 5,
+    "recall_at_k": 1.0,
+    "mrr": 1.0,
+    "citation_coverage": 1.0,
+    "average_latency_ms": 0.00025
+  },
+  "rows": [
+    {
+      "id": "q01",
+      "expected_sources": [
+        "product_handbook.md"
+      ],
+      "retrieved_sources": [
+        "product_handbook.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "product_handbook.md"
+      ],
+      "latency_ms": 0.001,
+      "mode": "fixture"
+    },
+    {
+      "id": "q02",
+      "expected_sources": [
+        "after_sales_policy.md"
+      ],
+      "retrieved_sources": [
+        "after_sales_policy.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "after_sales_policy.md"
+      ],
+      "latency_ms": 0.001,
+      "mode": "fixture"
+    },
+    {
+      "id": "q03",
+      "expected_sources": [
+        "content_sop.md"
+      ],
+      "retrieved_sources": [
+        "content_sop.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "content_sop.md"
+      ],
+      "latency_ms": 0.001,
+      "mode": "fixture"
+    },
+    {
+      "id": "q04",
+      "expected_sources": [
+        "geo_sop.md"
+      ],
+      "retrieved_sources": [
+        "geo_sop.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "geo_sop.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    },
+    {
+      "id": "q05",
+      "expected_sources": [
+        "product_handbook.md"
+      ],
+      "retrieved_sources": [
+        "product_handbook.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "product_handbook.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    },
+    {
+      "id": "q06",
+      "expected_sources": [
+        "after_sales_policy.md"
+      ],
+      "retrieved_sources": [
+        "after_sales_policy.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "after_sales_policy.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    },
+    {
+      "id": "q07",
+      "expected_sources": [
+        "content_sop.md"
+      ],
+      "retrieved_sources": [
+        "content_sop.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "content_sop.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    },
+    {
+      "id": "q08",
+      "expected_sources": [
+        "geo_sop.md"
+      ],
+      "retrieved_sources": [
+        "geo_sop.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "geo_sop.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    },
+    {
+      "id": "q09",
+      "expected_sources": [
+        "product_handbook.md"
+      ],
+      "retrieved_sources": [
+        "product_handbook.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "product_handbook.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    },
+    {
+      "id": "q10",
+      "expected_sources": [
+        "after_sales_policy.md"
+      ],
+      "retrieved_sources": [
+        "after_sales_policy.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "after_sales_policy.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    },
+    {
+      "id": "q11",
+      "expected_sources": [
+        "content_sop.md"
+      ],
+      "retrieved_sources": [
+        "content_sop.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "content_sop.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    },
+    {
+      "id": "q12",
+      "expected_sources": [
+        "geo_sop.md"
+      ],
+      "retrieved_sources": [
+        "geo_sop.md",
+        "product_handbook.md"
+      ],
+      "citations": [
+        "geo_sop.md"
+      ],
+      "latency_ms": 0.0,
+      "mode": "fixture"
+    }
+  ]
+}

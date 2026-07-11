@@ -1,7 +1,7 @@
 [project]
-name = "ntt-rag-project"
+name = "ecommerce-operations-rag-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "Grounded ecommerce operations knowledge agent with Chinese hybrid retrieval"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
@@ -47,4 +47,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["agent", "ingestion", "ui"]
+packages = ["agent", "ingestion", "ui", "evaluation", "scripts"]
