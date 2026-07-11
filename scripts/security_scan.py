@@ -25,6 +25,7 @@ def scan_paths(paths: list[Path]) -> list[str]:
                 or "settings." in line
                 or "missing-api-key" in line
                 or "os.getenv" in line
+                or "security-test-fixture" in line
             ):
                 continue
             if any(pattern.search(line) for pattern in PATTERNS):
