@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from time import perf_counter
 
 from .metrics import calculate_metrics
 
@@ -11,14 +10,13 @@ from .metrics import calculate_metrics
 def run_fixture(dataset: list[dict]) -> list[dict]:
     rows = []
     for item in dataset:
-        started = perf_counter()
         expected = item["expected_sources"]
         rows.append({
             "id": item["id"],
             "expected_sources": expected,
             "retrieved_sources": expected + ["product_handbook.md"],
             "citations": expected if item.get("requires_citation", True) else [],
-            "latency_ms": round((perf_counter() - started) * 1000, 3),
+            "latency_ms": 0.0,
             "mode": "fixture",
         })
     return rows

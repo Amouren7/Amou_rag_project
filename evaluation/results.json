@@ -7,7 +7,7 @@
     "recall_at_k": 1.0,
     "mrr": 1.0,
     "citation_coverage": 1.0,
-    "average_latency_ms": 0.00025
+    "average_latency_ms": 0.0
   },
   "rows": [
     {
@@ -22,7 +22,7 @@
       "citations": [
         "product_handbook.md"
       ],
-      "latency_ms": 0.001,
+      "latency_ms": 0.0,
       "mode": "fixture"
     },
     {
@@ -37,7 +37,7 @@
       "citations": [
         "after_sales_policy.md"
       ],
-      "latency_ms": 0.001,
+      "latency_ms": 0.0,
       "mode": "fixture"
     },
     {
@@ -52,7 +52,7 @@
       "citations": [
         "content_sop.md"
       ],
-      "latency_ms": 0.001,
+      "latency_ms": 0.0,
       "mode": "fixture"
     },
     {
