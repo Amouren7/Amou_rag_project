@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import AsyncMock
 
 from agent.models import ChunkResult
 from agent.tools import HybridSearchInput, get_retrieval_trace, hybrid_search_tool, reset_retrieval_trace
@@ -32,3 +33,30 @@ async def test_hybrid_tool_fuses_vector_and_keyword_results(monkeypatch):
     assert results[0].search_type == "hybrid"
     trace = get_retrieval_trace()
     assert trace[0]["chunk_id"] == "b"
+
+
+@pytest.mark.asyncio
+async def test_agent_hybrid_tool_exposes_document_id_for_followup_read(monkeypatch):
+    from types import SimpleNamespace
+    from agent.agent import AgentDependencies, hybrid_search
+    from agent.models import ChunkResult
+
+    result = ChunkResult(
+        chunk_id="chunk-1",
+        document_id="document-uuid",
+        content="售后规则",
+        score=0.9,
+        metadata={},
+        document_title="售后政策",
+        document_source="after_sales_policy.md",
+        page_number=1,
+        search_type="hybrid",
+    )
+    monkeypatch.setattr("agent.agent.hybrid_search_tool", AsyncMock(return_value=[result]))
+
+    deps = AgentDependencies(session_id="session")
+    rows = await hybrid_search(SimpleNamespace(deps=deps), "退换货", limit=3)
+
+    assert rows[0]["document_id"] == "document-uuid"
+    assert rows[0]["page_number"] == 1
+    assert deps.retrieval_trace[0]["chunk_id"] == "chunk-1"

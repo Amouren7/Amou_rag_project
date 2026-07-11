@@ -1,6 +1,7 @@
 
 import os
 import json
+import re
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta, timezone
 from contextlib import asynccontextmanager
@@ -78,6 +79,11 @@ async def close_database():
     await db_pool.close()
 
 async def execute_init_sql(sql_path: str):
+    with open(sql_path, 'r', encoding='utf-8') as file:
+        sql = file.read()
+    expected_match = re.search(r"embedding\s+vector\((\d+)\)", sql, re.IGNORECASE)
+    expected_dimension = int(expected_match.group(1)) if expected_match else None
+
     async with db_pool.acquire() as conn:
         row = await conn.fetchrow("""
             SELECT EXISTS (
@@ -88,13 +94,27 @@ async def execute_init_sql(sql_path: str):
         """)
         
         if row["exists"]:
+            if expected_dimension is not None:
+                vector_type = await conn.fetchval("""
+                    SELECT format_type(a.atttypid, a.atttypmod)
+                    FROM pg_attribute a
+                    WHERE a.attrelid = 'chunks'::regclass
+                      AND a.attname = 'embedding'
+                      AND NOT a.attisdropped
+                """)
+                actual_match = re.search(r"vector\((\d+)\)", vector_type or "", re.IGNORECASE)
+                actual_dimension = int(actual_match.group(1)) if actual_match else None
+                if actual_dimension != expected_dimension:
+                    raise ValueError(
+                        "Embedding vector dimension mismatch: "
+                        f"expected {expected_dimension}, found {actual_dimension or 'unknown'}. "
+                        "Migrate or recreate the database before ingestion."
+                    )
             logger.info("Schema already initialized, skipping.")
             return
 
-        with open(sql_path, 'r') as file:
-            sql = file.read()
-            await conn.execute(sql)
-            logger.info("Schema created successfully.")
+        await conn.execute(sql)
+        logger.info("Schema created successfully.")
 
 # Session Management Functions
 async def create_session(

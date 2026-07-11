@@ -18,7 +18,8 @@ from agent.db_utils import (
     vector_search,
     hybrid_search,
     get_document_chunks,
-    test_connection as db_test_connection
+    test_connection as db_test_connection,
+    execute_init_sql,
 )
 
 
@@ -85,6 +86,22 @@ class TestDatabasePool:
         
         async with pool.acquire() as conn:
             assert conn == mock_connection
+
+
+@pytest.mark.asyncio
+async def test_execute_init_sql_rejects_existing_wrong_vector_dimension(tmp_path):
+    schema = tmp_path / "schema.sql"
+    schema.write_text("CREATE TABLE chunks (embedding vector(1024));", encoding="utf-8")
+
+    with patch('agent.db_utils.db_pool') as mock_pool:
+        conn = AsyncMock()
+        conn.fetchrow.return_value = {"exists": True}
+        conn.fetchval.return_value = "vector(1536)"
+        mock_pool.acquire.return_value.__aenter__ = AsyncMock(return_value=conn)
+        mock_pool.acquire.return_value.__aexit__ = AsyncMock(return_value=None)
+
+        with pytest.raises(ValueError, match="expected 1024.*found 1536"):
+            await execute_init_sql(str(schema))
 
 
 class TestSessionManagement:

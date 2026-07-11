@@ -7,7 +7,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import uuid
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 import uvicorn
@@ -300,7 +300,7 @@ async def execute_agent(
         # Run the agent
         result = await rag_agent.run(full_prompt, deps=deps)
         
-        response = result.data
+        response = result.output
         tools_used = extract_tool_calls(result)
         
         # Save conversation if requested
@@ -315,7 +315,7 @@ async def execute_agent(
                 }
             )
         
-        return response, tools_used, build_citations(get_retrieval_trace())
+        return response, tools_used, build_citations(deps.retrieval_trace)
         
     except Exception as e:
         logger.error(f"Agent execution failed: {e}")
@@ -471,7 +471,7 @@ async def chat_stream(request: ChatRequest):
                     }
                 )
                 
-                citations = [citation.model_dump() for citation in build_citations(get_retrieval_trace())]
+                citations = [citation.model_dump() for citation in build_citations(deps.retrieval_trace)]
                 yield f"data: {json.dumps({'type': 'final', 'answer': full_response, 'citations': citations, 'tools_used': tools_data if tools_used else [], 'session_id': session_id}, ensure_ascii=False)}\n\n"
                 
             except Exception as e:
@@ -597,11 +597,12 @@ async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler."""
     logger.error(f"Unhandled exception: {exc}")
     
-    return ErrorResponse(
-        error=str(exc),
+    payload = ErrorResponse(
+        error="Internal server error",
         error_type=type(exc).__name__,
-        request_id=str(uuid.uuid4())
+        request_id=str(uuid.uuid4()),
     )
+    return JSONResponse(status_code=500, content=payload.model_dump())
 
 
 # Run the app with Uvicorn

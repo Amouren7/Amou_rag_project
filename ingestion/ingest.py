@@ -326,15 +326,22 @@ class DocumentIngestionPipeline:
 
                     await conn.execute(
                         """
-                        INSERT INTO chunks (document_id, content, embedding, chunk_index, metadata, token_count)
-                        VALUES ($1::uuid, $2, $3::vector, $4, $5, $6)
+                        INSERT INTO chunks (
+                            document_id, content, embedding, chunk_index, metadata, token_count,
+                            page_number, source_file, content_type, chunk_method
+                        )
+                        VALUES ($1::uuid, $2, $3::vector, $4, $5, $6, $7, $8, $9, $10)
                         """,
                         document_id,
                         chunk.content,
                         embedding_data,
                         chunk.index,
                         json.dumps(metadata),
-                        chunk.token_count if hasattr(chunk, 'token_count') else len(chunk.content.split())
+                        chunk.token_count if hasattr(chunk, 'token_count') else len(chunk.content.split()),
+                        chunk.metadata.get("page_number"),
+                        chunk.metadata.get("source_file"),
+                        chunk.metadata.get("content_type"),
+                        chunk.metadata.get("chunk_method"),
                     )
                 
                 return document_id

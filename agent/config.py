@@ -24,7 +24,7 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> "Settings":
-        raw_dimension = os.getenv("EMBEDDING_DIMENSION", "1536")
+        raw_dimension = os.getenv("EMBEDDING_DIMENSION", "1024")
         try:
             dimension = int(raw_dimension)
         except ValueError as exc:
@@ -37,8 +37,8 @@ class Settings:
             llm_base_url=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1").rstrip("/"),
             llm_model=os.getenv("LLM_MODEL", os.getenv("LLM_CHOICE", "gpt-4o-mini")),
             embedding_api_key=_optional("EMBEDDING_API_KEY", "OPENAI_API_KEY"),
-            embedding_base_url=os.getenv("EMBEDDING_BASE_URL", "https://api.openai.com/v1").rstrip("/"),
-            embedding_model=os.getenv("EMBEDDING_MODEL", "text-embedding-3-small"),
+            embedding_base_url=os.getenv("EMBEDDING_BASE_URL", "https://api.siliconflow.cn/v1").rstrip("/"),
+            embedding_model=os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3"),
             embedding_dimension=dimension,
             model_timeout_seconds=float(os.getenv("MODEL_TIMEOUT_SECONDS", "60")),
         )

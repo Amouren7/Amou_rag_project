@@ -99,14 +99,21 @@ class TestPDFSemanticChunker:
         assert hasattr(chunker, 'fallback_splitter')
     
     @patch('ingestion.chunker.OpenAIEmbeddings')
-    def test_chunker_initialization_semantic(self, mock_embeddings):
+    def test_chunker_initialization_semantic(self, mock_embeddings, monkeypatch):
         """Test chunker initialization with semantic splitter."""
+        monkeypatch.setenv("EMBEDDING_API_KEY", "embed-key")
+        monkeypatch.setenv("EMBEDDING_BASE_URL", "https://embed.example/v1")
+        monkeypatch.setenv("EMBEDDING_MODEL", "embedding-model")
         config = ChunkingConfig(use_semantic_splitting=True)
         chunker = PDFSemanticChunker(config)
         
         assert chunker.config == config
         assert hasattr(chunker, 'semantic_splitter')
-        mock_embeddings.assert_called_once()
+        mock_embeddings.assert_called_once_with(
+            model="embedding-model",
+            api_key="embed-key",
+            base_url="https://embed.example/v1",
+        )
     
     def test_chunk_content_recursive(self):
         """Test chunking content with recursive splitter."""

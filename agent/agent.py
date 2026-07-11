@@ -1,7 +1,7 @@
 
 import logging
 from typing import Dict, Any, List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pydantic_ai import Agent, RunContext
 from dotenv import load_dotenv
 from .prompts import SYSTEM_PROMPT
@@ -29,6 +29,7 @@ class AgentDependencies:
     session_id: str
     user_id: Optional[str] = None
     search_preferences: Dict[str, Any] = None
+    retrieval_trace: List[Dict[str, Any]] = field(default_factory=list)
     
     def __post_init__(self):
         if self.search_preferences is None:
@@ -71,6 +72,7 @@ async def vector_search(
     )
     
     results = await vector_search_tool(input_data)
+    ctx.deps.retrieval_trace.extend(result.model_dump() for result in results)
     
     # Convert results to dict for agent
     return [
@@ -79,6 +81,8 @@ async def vector_search(
             "score": r.score,
             "document_title": r.document_title,
             "document_source": r.document_source,
+            "document_id": r.document_id,
+            "page_number": r.page_number,
             "chunk_id": r.chunk_id
         }
         for r in results
@@ -113,6 +117,7 @@ async def hybrid_search(
     )
     
     results = await hybrid_search_tool(input_data)
+    ctx.deps.retrieval_trace.extend(result.model_dump() for result in results)
     
     # Convert results to dict for agent
     return [
@@ -121,6 +126,8 @@ async def hybrid_search(
             "score": r.score,
             "document_title": r.document_title,
             "document_source": r.document_source,
+            "document_id": r.document_id,
+            "page_number": r.page_number,
             "chunk_id": r.chunk_id
         }
         for r in results
@@ -196,4 +203,3 @@ async def list_documents(
         }
         for d in documents
     ]
-

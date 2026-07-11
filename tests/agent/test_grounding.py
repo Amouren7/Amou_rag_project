@@ -15,3 +15,13 @@ def test_schema_uses_chinese_friendly_trigram_search():
     assert "similarity(c.content, query_text)" in schema
     assert "ILIKE" in schema
     assert "to_tsvector('english'" not in schema
+
+
+def test_documented_embedding_dimension_matches_schema():
+    schema = Path("sql/schema.sql").read_text(encoding="utf-8")
+    env_example = Path(".env.example").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+
+    assert "embedding vector(1024)" in schema
+    assert "EMBEDDING_DIMENSION=1024" in env_example
+    assert "EMBEDDING_DIMENSION=1024" in readme

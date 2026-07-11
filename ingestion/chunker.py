@@ -1,12 +1,12 @@
 
 import logging
-import os
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from langchain_core.documents import Document
 from langchain_text_splitters import  RecursiveCharacterTextSplitter
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_openai import OpenAIEmbeddings
+from agent.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,12 @@ class PDFSemanticChunker:
     
     def __init__(self, config: ChunkingConfig):
         self.config = config
-        self.embeddings = OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY"))
+        settings = get_settings()
+        self.embeddings = OpenAIEmbeddings(
+            model=settings.embedding_model,
+            api_key=settings.embedding_api_key,
+            base_url=settings.embedding_base_url,
+        )
         
         # Semantic splitter
         if config.use_semantic_splitting:
