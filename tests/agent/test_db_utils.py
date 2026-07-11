@@ -214,6 +214,13 @@ class TestMessageManagement:
             assert messages[1]["role"] == "assistant"
             mock_conn.fetch.assert_called_once()
 
+            query, session_id, limit = mock_conn.fetch.call_args[0]
+            assert "ORDER BY created_at DESC" in query
+            assert "ORDER BY recent.created_at ASC" in query
+            assert "LIMIT $2" in query
+            assert session_id == "session-123"
+            assert limit == 10
+
 
 class TestDocumentManagement:
     """Test document management functions."""

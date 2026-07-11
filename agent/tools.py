@@ -7,13 +7,14 @@ from dotenv import load_dotenv
 
 from .db_utils import (
     vector_search,
-    hybrid_search,
+    keyword_search,
     get_document,
     list_documents,
     get_document_chunks
 )
 from .models import ChunkResult, DocumentMetadata
 from .providers import get_embedding_client, get_embedding_model
+from .retrieval import reciprocal_rank_fusion
 
 # Load environment variables
 load_dotenv()
@@ -54,7 +55,7 @@ class HybridSearchInput(BaseModel):
     """Input for hybrid search tool."""
     query: str = Field(..., description="Search query")
     limit: int = Field(default=10, description="Maximum number of results")
-    text_weight: float = Field(default=0.3, description="Weight for text similarity (0-1)")
+    text_weight: float = Field(default=0.3, description="Deprecated compatibility field")
 class DocumentInput(BaseModel):
     """Input for document retrieval."""
     document_id: str = Field(..., description="Document ID to retrieve")
@@ -93,7 +94,10 @@ async def vector_search_tool(input_data: VectorSearchInput) -> List[ChunkResult]
                 score=r["similarity"],
                 metadata=r["metadata"],
                 document_title=r["document_title"],
-                document_source=r["document_source"]
+                document_source=r["document_source"],
+                page_number=r.get("page_number"),
+                source_file=r.get("document_source"),
+                search_type="vector",
             )
             for r in results
         ]
@@ -116,13 +120,9 @@ async def hybrid_search_tool(input_data: HybridSearchInput) -> List[ChunkResult]
         # Generate embedding for the query
         embedding = await generate_embedding(input_data.query)
         
-        # Perform hybrid search
-        results = await hybrid_search(
-            embedding=embedding,
-            query_text=input_data.query,
-            limit=input_data.limit,
-            text_weight=input_data.text_weight
-        )
+        vector_results = await vector_search(embedding=embedding, limit=input_data.limit)
+        keyword_results = await keyword_search(input_data.query, limit=input_data.limit)
+        results = reciprocal_rank_fusion(vector_results, keyword_results)[:input_data.limit]
         
         # Convert to ChunkResult models
         return [
@@ -130,10 +130,13 @@ async def hybrid_search_tool(input_data: HybridSearchInput) -> List[ChunkResult]
                 chunk_id=str(r["chunk_id"]),
                 document_id=str(r["document_id"]),
                 content=r["content"],
-                score=r["combined_score"],
+                score=r["score"],
                 metadata=r["metadata"],
                 document_title=r["document_title"],
-                document_source=r["document_source"]
+                document_source=r["document_source"],
+                page_number=r.get("page_number"),
+                source_file=r.get("document_source"),
+                search_type=r.get("search_type", "hybrid"),
             )
             for r in results
         ]
@@ -198,4 +201,3 @@ async def list_documents_tool(input_data: DocumentListInput) -> List[DocumentMet
     except Exception as e:
         logger.error(f"Document listing failed: {e}")
         return []
-

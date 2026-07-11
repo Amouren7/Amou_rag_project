@@ -217,22 +217,26 @@ async def get_session_messages(
         List of messages ordered by creation time
     """
     async with db_pool.acquire() as conn:
-        query = """
-            SELECT 
-                id::text,
-                role,
-                content,
-                metadata,
-                created_at
-            FROM messages
-            WHERE session_id = $1::uuid
-            ORDER BY created_at
-        """
-        
         if limit:
-            query += f" LIMIT {limit}"
-        
-        results = await conn.fetch(query, session_id)
+            query = """
+                SELECT * FROM (
+                    SELECT id::text, role, content, metadata, created_at
+                    FROM messages
+                    WHERE session_id = $1::uuid
+                    ORDER BY created_at DESC
+                    LIMIT $2
+                ) AS recent
+                ORDER BY recent.created_at ASC
+            """
+            results = await conn.fetch(query, session_id, limit)
+        else:
+            query = """
+                SELECT id::text, role, content, metadata, created_at
+                FROM messages
+                WHERE session_id = $1::uuid
+                ORDER BY created_at ASC
+            """
+            results = await conn.fetch(query, session_id)
         
         return [
             {
@@ -382,9 +386,34 @@ async def vector_search(
                 "metadata": json.loads(row["metadata"]),
                 "document_title": row["document_title"],
                 "document_source": row["document_source"]
+                ,"page_number": row.get("page_number") if hasattr(row, "get") else None
             }
             for row in results
         ]
+
+async def keyword_search(query_text: str, limit: int = 10) -> List[Dict[str, Any]]:
+    """Chinese-friendly keyword search using substring and pg_trgm similarity."""
+    async with db_pool.acquire() as conn:
+        results = await conn.fetch(
+            """
+            SELECT c.id AS chunk_id, c.document_id, c.content,
+                   GREATEST(similarity(c.content, $1),
+                            CASE WHEN c.content ILIKE '%' || $1 || '%' THEN 1.0 ELSE 0.0 END) AS text_similarity,
+                   c.metadata, c.page_number, d.title AS document_title, d.source AS document_source
+            FROM chunks c JOIN documents d ON d.id = c.document_id
+            WHERE c.content ILIKE '%' || $1 || '%' OR similarity(c.content, $1) > 0.05
+            ORDER BY text_similarity DESC
+            LIMIT $2
+            """,
+            query_text,
+            limit,
+        )
+        return [{
+            "chunk_id": row["chunk_id"], "document_id": row["document_id"],
+            "content": row["content"], "text_similarity": row["text_similarity"],
+            "metadata": json.loads(row["metadata"]), "page_number": row["page_number"],
+            "document_title": row["document_title"], "document_source": row["document_source"],
+        } for row in results]
 
 async def hybrid_search(
     embedding: List[float],

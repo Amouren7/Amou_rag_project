@@ -32,6 +32,10 @@ CREATE TABLE chunks (
     chunk_index INTEGER NOT NULL,
     metadata JSONB DEFAULT '{}',
     token_count INTEGER,
+    page_number INTEGER,
+    source_file TEXT,
+    content_type TEXT,
+    chunk_method TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -76,6 +80,7 @@ RETURNS TABLE (
     metadata JSONB,
     document_title TEXT,
     document_source TEXT
+    ,page_number INTEGER
 )
 LANGUAGE plpgsql
 AS $$
@@ -89,6 +94,7 @@ BEGIN
         c.metadata,
         d.title AS document_title,
         d.source AS document_source
+        ,c.page_number
     FROM chunks c
     JOIN documents d ON c.document_id = d.id
     WHERE c.embedding IS NOT NULL
@@ -136,13 +142,17 @@ BEGIN
             c.id AS chunk_id,
             c.document_id,
             c.content,
-            ts_rank_cd(to_tsvector('english', c.content), plainto_tsquery('english', query_text))::double precision AS text_sim,
+            GREATEST(
+                similarity(c.content, query_text),
+                CASE WHEN c.content ILIKE '%' || query_text || '%' THEN 1.0 ELSE 0.0 END
+            )::double precision AS text_sim,
             c.metadata,
             d.title AS doc_title,
             d.source AS doc_source
         FROM chunks c
         JOIN documents d ON c.document_id = d.id
-        WHERE to_tsvector('english', c.content) @@ plainto_tsquery('english', query_text)
+        WHERE c.content ILIKE '%' || query_text || '%'
+           OR similarity(c.content, query_text) > 0.05
     )
     SELECT 
         COALESCE(v.chunk_id, t.chunk_id) AS chunk_id,
