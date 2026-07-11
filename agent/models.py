@@ -18,6 +18,10 @@ class ChunkResult(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     document_title: str
     document_source: str
+    page_number: Optional[int] = None
+    source_file: Optional[str] = None
+    content_type: Optional[str] = None
+    search_type: str = "vector"
     
     @field_validator('score')
     @classmethod
@@ -66,6 +70,19 @@ class ToolCall(BaseModel):
     args: Dict[str, Any] = Field(default_factory=dict)
     tool_call_id: Optional[str] = None
 
+class Citation(BaseModel):
+    chunk_id: str
+    document_title: str
+    document_source: str
+    page_number: Optional[int] = None
+    snippet: str
+    score: float = 0.0
+    search_type: str = "unknown"
+
+class GroundedAnswer(BaseModel):
+    answer: str
+    citations: List[Citation] = Field(default_factory=list)
+
 class ChatResponse(BaseModel):
     """Chat response model."""
     message: str
@@ -73,6 +90,7 @@ class ChatResponse(BaseModel):
     sources: List[DocumentMetadata] = Field(default_factory=list)
     tools_used: List[ToolCall] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    citations: List[Citation] = Field(default_factory=list)
 
 # Ingestion Models
 class IngestionConfig(BaseModel):
