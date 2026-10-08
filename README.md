@@ -1,3 +1,21 @@
+> **一句话**：面向商品资料 / 平台规则 / 内容规范 / 运营 SOP 的**可追溯**问答系统 —— 单 Agent 多工具的 Agentic RAG：
+> **pgvector 向量召回 + pg_trgm 中文关键词召回 + RRF 排名融合**，答案带结构化 citations，
+> 并配 **Recall@K / MRR / 引用覆盖率 / 响应时间** 的离线评测。
+
+**技术栈**：`FastAPI` `PydanticAI` `PostgreSQL / pgvector` `pg_trgm` `Streamlit` `Docker` `SSE 流式`
+
+**看这三处就够**
+- 混合检索与 RRF 融合 → `agent/`
+- 离线评测（Recall@K、MRR、引用覆盖率、响应时间）→ `evaluation/`
+- 摄取与切分（语义切分 + 递归切分降级）→ `ingestion/`
+
+**一键跑起来**：`docker compose up -d postgres` → `uv sync` → 摄取 → `docker compose up -d api ui`（详见下方「快速启动」）
+
+> 来源说明：基于 MIT 开源项目 `ntt_rag_project` 深度二次开发，保留 FastAPI / PydanticAI / PostgreSQL-pgvector / Streamlit 主体，
+> **新增**中文混合检索、RRF 排名融合、结构化引用溯源、多格式摄取与离线评测。`documents_demo/` 全部为虚构演示资料。
+
+---
+
 # 电商运营知识 RAG Agent
 
 面向商品资料、平台规则、内容规范、运营 SOP 与历史案例的可追溯问答系统。项目基于 Serkan Yaşar 的 MIT 开源 `ntt_rag_project` 深度二次开发，保留 FastAPI、PydanticAI、PostgreSQL/pgvector 与 Streamlit 主体，并新增中文混合检索、结构化引用、多格式摄取和离线评测。
